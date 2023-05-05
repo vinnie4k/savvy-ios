@@ -8,8 +8,10 @@
 import UIKit
 
 class ViewController: UIViewController, UISearchBarDelegate {
+    
     let logoImageView = UIImageView()
-    let pageLabel = UILabel()
+    let greetingLabel = UILabel()
+    let nameButton = UIButton()
     var logoutButton = UIButton()
     let forYouLabel = UILabel()
     var collectionView: UICollectionView!
@@ -25,12 +27,12 @@ class ViewController: UIViewController, UISearchBarDelegate {
     let linePadding: CGFloat = 16
     let sectionPadding: CGFloat = 10
     
-    let filterItemPadding: CGFloat = 1
+    let filterItemPadding: CGFloat = 5
     let filterLinePadding: CGFloat = 16
     let filterSectionPadding: CGFloat = 1
     
-    let cellWidth: CGFloat = 318
-    let cellHeight: CGFloat = 222
+    let cellWidth: CGFloat = 323
+    let cellHeight: CGFloat = 150
     let cellSpacing: CGFloat = 8.0
     
     let filterCellWidth: CGFloat = 69
@@ -42,11 +44,11 @@ class ViewController: UIViewController, UISearchBarDelegate {
     let reuseID = "postCell"
     
     // Set up data sources
-    private var forYouPosts: [[Post]] = [[]]
-    var forYouFilters:[String] = UserDefaults.standard.array(forKey: "interests") as? [String] ?? []
+    private var forYouPosts: [Post] = []
+    private var allPosts: [Post] = posts
     
-    private var allPosts: [[Post]] = [posts]
     var selectedFilters = [String]()
+    var searchFilters = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,18 +57,28 @@ class ViewController: UIViewController, UISearchBarDelegate {
         
         let is_authenticated = UserDefaults.standard.bool(forKey: "is_authenticated") // return false if not found or stored value
         if (is_authenticated != true) {
-            let sceneDelegate = self.view.window?.windowScene?.delegate as! SceneDelegate
-            sceneDelegate.moveToLogin()
+            let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate
+            sceneDelegate?.moveToLogin()
         }
-        
-        logoImageView.image = UIImage(named: "logo")
+       
+        logoImageView.image = UIImage(named: UserDefaults.standard.string(forKey: "netid")!)
+        logoImageView.contentMode = .scaleAspectFill
+        logoImageView.layer.cornerRadius = 9
+        logoImageView.layer.masksToBounds = true
         logoImageView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(logoImageView)
         
-        pageLabel.text = "Hey, " + (UserDefaults.standard.string(forKey: "userName") ?? "")
-        pageLabel.translatesAutoresizingMaskIntoConstraints = false
-        pageLabel.font = .systemFont(ofSize: 24, weight: .medium)
-        self.view.addSubview(pageLabel)
+        greetingLabel.text = "Good Morning!"
+        greetingLabel.translatesAutoresizingMaskIntoConstraints = false
+        greetingLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        self.view.addSubview(greetingLabel)
+        
+        nameButton.setTitle(UserDefaults.standard.string(forKey: "userName")!, for: .normal)
+        nameButton.setTitleColor(.black, for: .normal)
+        nameButton.titleLabel?.font = UIFont(name: "Times New Roman", size: 32)
+        nameButton.translatesAutoresizingMaskIntoConstraints = false
+        nameButton.addTarget(self, action: #selector(viewProfile), for: .touchUpInside)
+        self.view.addSubview(nameButton)
         
         logoutButton.setTitle("Logout", for: .normal)
         logoutButton.setTitleColor(.black, for: .normal)
@@ -79,7 +91,7 @@ class ViewController: UIViewController, UISearchBarDelegate {
         
         forYouLabel.text = "For you"
         forYouLabel.translatesAutoresizingMaskIntoConstraints = false
-        forYouLabel.font = .systemFont(ofSize: 20, weight: .medium)
+        forYouLabel.font = UIFont(name: "Times New Roman", size: 24)
         self.view.addSubview(forYouLabel)
         
         // Set up flow layouts for CollectionViews
@@ -88,12 +100,14 @@ class ViewController: UIViewController, UISearchBarDelegate {
         flowLayout.minimumLineSpacing = linePadding
         flowLayout.scrollDirection = .horizontal
         flowLayout.sectionInset = UIEdgeInsets(top: sectionPadding, left: sectionPadding, bottom: sectionPadding, right: sectionPadding)
-        flowLayout.itemSize = CGSize(width: 318, height: 222)
-        // Instantiate CollectionView
+        flowLayout.itemSize = CGSize(width: cellWidth, height: cellHeight)
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         collectionView.tag = 1
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(collectionView)
+        collectionView.register(CustomCollectionViewCell.self, forCellWithReuseIdentifier: forYouReuseID)
+        collectionView.dataSource = self
+        collectionView.delegate = self
         
         let filterFlowLayout = UICollectionViewFlowLayout()
         filterFlowLayout.minimumInteritemSpacing = filterItemPadding
@@ -104,30 +118,21 @@ class ViewController: UIViewController, UISearchBarDelegate {
         filterCollectionView.tag = 2
         filterCollectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(filterCollectionView)
-        
-        
-        // Create CollectionViewCell and register it here
-        collectionView.register(CustomCollectionViewCell.self, forCellWithReuseIdentifier: forYouReuseID)
-        filterCollectionView.register(CustomFilterCollectionViewCell.self, forCellWithReuseIdentifier: filterReuseID)
-        
-        // Set CollectionView data source
-        collectionView.dataSource = self
+        filterCollectionView.register(SearchFilterCollectionViewCell.self, forCellWithReuseIdentifier: filterReuseID)
         filterCollectionView.dataSource = self
-        
-        // Set CollectionView delegate
-        collectionView.delegate = self
         filterCollectionView.delegate = self
         
         browseLabel.text = "Browse"
         browseLabel.translatesAutoresizingMaskIntoConstraints = false
         browseLabel.font = .systemFont(ofSize: 20, weight: .medium)
+        browseLabel.font = UIFont(name: "Times New Roman", size: 24)
         self.view.addSubview(browseLabel)
         
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(searchBar)
         searchBar.delegate = self
         
-        filterLabel.text = "Filter by:"
+        filterLabel.text = String(allPosts.count) + " Opportunities Available"
         filterLabel.translatesAutoresizingMaskIntoConstraints = false
         filterLabel.font = .systemFont(ofSize: 16, weight: .medium)
         self.view.addSubview(filterLabel)
@@ -145,80 +150,24 @@ class ViewController: UIViewController, UISearchBarDelegate {
         filterAllPosts()
         setupConstraints()
     }
-    
-    func filterForYouPosts() {
-        forYouPosts[0].removeAll()
-        if (forYouFilters.count == 0) {
-            forYouPosts[0] = []
-        }
-        else {
-            for curPost in posts {
-                for curFilter in forYouFilters {
-                    if (curPost.type.contains(curFilter)) {
-                        forYouPosts[0].append(curPost)
-                        print(curPost.positionName)
-                        break
-                    }
-                }
-            }
-        }
-        collectionView.reloadData()
-    }
-    
-    func filterAllPosts() {
-        allPosts[0].removeAll()
-        if (selectedFilters.count == 0) {
-            allPosts[0] = posts
-        }
-        else {
-            for curPost in posts {
-                for curFilter in selectedFilters {
-                    if (curPost.type.contains(curFilter)) {
-                        allPosts[0].append(curPost)
-                        print(curPost.positionName)
-                        break
-                    }
-                }
-            }
-        }
-        tableView.reloadData()
-        filterCollectionView.reloadData()
-    }
-    
-    func searchPosts(searchText: String) {
-        allPosts[0].removeAll()
-        if (searchText == "") {
-            allPosts[0] = posts
-        }
-        else {
-            for curPost in posts {
-                if (curPost.type.contains(searchText)
-                    || curPost.positionName.contains(searchText)
-                    || curPost.description.contains(searchText)
-                    || curPost.employer.contains(searchText)
-                ) {
-                    allPosts[0].append(curPost)
-                    print(curPost.positionName)
-                    break
-                }
-            }
-        }
-        tableView.reloadData()
-        filterCollectionView.reloadData()
-    }
 
     func setupConstraints() {
         
         NSLayoutConstraint.activate([
-            logoImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            logoImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 140),
             logoImageView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 36),
-            logoImageView.widthAnchor.constraint(equalToConstant: 36),
-            logoImageView.heightAnchor.constraint(equalToConstant: 36)
+            logoImageView.widthAnchor.constraint(equalToConstant: 64),
+            logoImageView.heightAnchor.constraint(equalToConstant: 64)
         ])
         
         NSLayoutConstraint.activate([
-            pageLabel.centerYAnchor.constraint(equalTo: logoImageView.centerYAnchor),
-            pageLabel.leadingAnchor.constraint(equalTo: logoImageView.trailingAnchor, constant: 12)
+            greetingLabel.topAnchor.constraint(equalTo: logoImageView.topAnchor),
+            greetingLabel.leadingAnchor.constraint(equalTo: logoImageView.trailingAnchor, constant: 16)
+        ])
+        
+        NSLayoutConstraint.activate([
+            nameButton.topAnchor.constraint(equalTo: greetingLabel.bottomAnchor),
+            nameButton.leadingAnchor.constraint(equalTo: logoImageView.trailingAnchor, constant: 16)
         ])
         
         NSLayoutConstraint.activate([
@@ -229,47 +178,49 @@ class ViewController: UIViewController, UISearchBarDelegate {
         ])
         
         NSLayoutConstraint.activate([
-            forYouLabel.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 48),
+            forYouLabel.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 32),
             forYouLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 36),
-            forYouLabel.widthAnchor.constraint(equalToConstant: 71),
-            forYouLabel.heightAnchor.constraint(equalToConstant: 24)
+            forYouLabel.widthAnchor.constraint(equalToConstant: 86),
+            forYouLabel.heightAnchor.constraint(equalToConstant: 32)
         ])
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: forYouLabel.bottomAnchor, constant: 8),
-            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 26),
+            collectionView.topAnchor.constraint(equalTo: forYouLabel.bottomAnchor, constant: 16),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            collectionView.heightAnchor.constraint(equalToConstant: 222)
+            collectionView.heightAnchor.constraint(equalToConstant: 150)
         ])
         
         NSLayoutConstraint.activate([
-            browseLabel.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 40),
+            browseLabel.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
             browseLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 36),
-            browseLabel.widthAnchor.constraint(equalToConstant: 72),
-            browseLabel.heightAnchor.constraint(equalToConstant: 24)
+            browseLabel.widthAnchor.constraint(equalToConstant: 85),
+            browseLabel.heightAnchor.constraint(equalToConstant: 32)
         ])
         
         NSLayoutConstraint.activate([
-            searchBar.topAnchor.constraint(equalTo: browseLabel.bottomAnchor, constant: 8),
+            searchBar.topAnchor.constraint(equalTo: browseLabel.bottomAnchor, constant: 16),
             searchBar.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 26),
             searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -26),
             searchBar.widthAnchor.constraint(equalToConstant: 318),
-            searchBar.heightAnchor.constraint(equalToConstant: 30)
+            searchBar.heightAnchor.constraint(equalToConstant: 40)
         ])
         
-        NSLayoutConstraint.activate([
-            filterLabel.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 28),
-            filterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 36),
-            filterLabel.widthAnchor.constraint(equalToConstant: 67),
-            filterLabel.heightAnchor.constraint(equalToConstant: 19)
-        ])
         
         NSLayoutConstraint.activate([
-            filterCollectionView.centerYAnchor.constraint(equalTo: filterLabel.centerYAnchor),
-            filterCollectionView.leadingAnchor.constraint(equalTo: filterLabel.trailingAnchor, constant: 5),
+            filterCollectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
+            filterCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 36),
             filterCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             filterCollectionView.heightAnchor.constraint(equalToConstant: 26)
         ])
+        
+        NSLayoutConstraint.activate([
+            filterLabel.topAnchor.constraint(equalTo: filterCollectionView.bottomAnchor, constant: 24),
+            filterLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 36),
+            filterLabel.widthAnchor.constraint(equalToConstant: 300),
+            filterLabel.heightAnchor.constraint(equalToConstant: 19)
+        ])
+        
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: filterLabel.bottomAnchor, constant: 18),
@@ -291,9 +242,98 @@ class ViewController: UIViewController, UISearchBarDelegate {
         self.dismiss(animated: true, completion: nil)
     }
     
-    @objc func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print("Search")
-        searchPosts(searchText: searchText)
+    @objc func viewProfile () {
+        guard let currentUser = getUser(netid: UserDefaults.standard.string(forKey: "netid")!) else { return }
+        let vc = ProfileViewController(user: currentUser)
+        //vc.del = self
+        navigationController?.pushViewController(vc, animated: true)    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchFilters.append(searchBar.text ?? "")
+        searchBar.text = ""
+        filterAllPosts()
+        tableView.reloadData()
+        filterCollectionView.reloadData()
+        
+    }
+    
+    private func getUser(netid: String) -> User? {
+        for user in users {
+                if user.netid == netid {
+                    return user
+                }
+            }
+            return nil
+    }
+    /*
+    func searchPosts(searchText: String) {
+        allPosts.removeAll()
+        if (searchText == "") {
+            allPosts = posts
+        }
+        else {
+            for curPost in posts {
+                if (curPost.type.contains(searchText)
+                    || curPost.positionName.contains(searchText)
+                    || curPost.description.contains(searchText)
+                    || curPost.employer.contains(searchText)
+                ) {
+                    allPosts.append(curPost)
+                    print(curPost.positionName)
+                    break
+                }
+            }
+        }
+        tableView.reloadData()
+        filterCollectionView.reloadData()
+    }*/
+    
+    func filterForYouPosts() {
+        guard let currentUser = getUser(netid: UserDefaults.standard.string(forKey: "netid")!) else { return }
+        forYouPosts.removeAll()
+        if (currentUser.savedTags.count == 0) {
+            forYouPosts = []
+        }
+        else {
+            //concatenate tags in user profile
+            var combinedTags = ""
+            for curTag in currentUser.savedTags {
+                combinedTags = combinedTags + " | " + curTag.label
+            }
+            for curPost in posts {
+                for tag in curPost.tags {
+                    if (combinedTags.contains(tag.label)) {
+                        forYouPosts.append(curPost)
+                        break
+                    }
+                }
+            }
+        }
+        collectionView.reloadData()
+    }
+    
+    func filterAllPosts() {
+        allPosts.removeAll()
+        if (searchFilters.count == 0) {
+            allPosts = posts
+        }
+        else {
+            for curPost in posts {
+                for searchText in searchFilters {
+                    if (curPost.organization.contains(searchText)
+                        || curPost.position.contains(searchText)
+                        || curPost.description.contains(searchText)
+                        || curPost.qualifications.contains(searchText)
+                    ) {
+                        allPosts.append(curPost)
+                        break
+                    }
+                }
+            }
+        }
+        filterLabel.text = String(allPosts.count) + " Opportunities Available"
+        tableView.reloadData()
+        filterCollectionView.reloadData()
     }
     
 }
@@ -302,15 +342,15 @@ class ViewController: UIViewController, UISearchBarDelegate {
 extension ViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if (collectionView.tag == 1) {
-            return forYouPosts[section].count
+            return forYouPosts.count
         }
-        return filters.count
+        return searchFilters.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if (collectionView.tag == 1) {
             if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: forYouReuseID, for: indexPath) as? CustomCollectionViewCell {
-                let post = forYouPosts[indexPath.section][indexPath.item]
+                let post = forYouPosts[indexPath.item]
                 cell.update(post: post)
                 return cell
             }
@@ -318,9 +358,9 @@ extension ViewController: UICollectionViewDataSource {
         }
         else {
             
-            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: filterReuseID, for: indexPath) as? CustomFilterCollectionViewCell {
-                let filter = filters[indexPath.item]
-                cell.configure(filterName: filter)
+            if let cell = collectionView.dequeueReusableCell(withReuseIdentifier: filterReuseID, for: indexPath) as? SearchFilterCollectionViewCell {
+                let filter = searchFilters[indexPath.item]
+                cell.setup(filterLabel: filter)
                 return cell
             }
             return UICollectionViewCell()
@@ -340,11 +380,16 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if (collectionView.tag == 1) {
+            
             return CGSize(width: cellWidth, height: cellHeight)
         } else {
-            return CGSize(width: filterCellWidth, height: filterCellHeight)
-            
+            let label = UILabel()
+            label.text = searchFilters[indexPath.item]
+            label.sizeToFit()
+            return CGSize(width: label.bounds.width + 40, height: label.bounds.height + 10)
+            //return CGSize(width: filterCellWidth, height: filterCellHeight)
         }
+       
     }
     
 }
@@ -353,9 +398,14 @@ extension ViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
         if (collectionView.tag == 2) {
-            let item = filters[indexPath.item]
-            let isSelected = item.isSelected
-            let filterLabel = item.filterLabel
+            
+            let item = searchFilters[indexPath.item]
+           
+            if let index = searchFilters.firstIndex(of: item){
+                searchFilters.remove(at: index)
+                print(searchFilters)
+            }
+            /*
             if (isSelected) {
                 print("deselect")
                 item.isSelected = false
@@ -369,10 +419,10 @@ extension ViewController: UICollectionViewDelegate {
                 item.isSelected = true
                 selectedFilters.insert(filterLabel, at: 0)
                 print(selectedFilters)
-            }
+            }*/
             filterAllPosts()
         } else {
-            let currentPost = forYouPosts[indexPath.section][indexPath.item]
+            let currentPost = forYouPosts[indexPath.item]
             let vc = ViewPostDetailsViewController(post: currentPost)
             //vc.del = self
             navigationController?.pushViewController(vc, animated: true)
@@ -384,11 +434,11 @@ extension ViewController: UICollectionViewDelegate {
 extension ViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return allPosts[0].count
+        return allPosts.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: reuseID, for: indexPath) as? TableViewCell{
-            let currentPost = allPosts[indexPath.section][indexPath.item]
+            let currentPost = allPosts[indexPath.item]
             cell.updateFrom(post: currentPost)
             return cell
           }
@@ -403,7 +453,7 @@ extension ViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath){
-        let currentPost = allPosts[indexPath.section][indexPath.item]
+        let currentPost = allPosts[indexPath.item]
         let vc = ViewPostDetailsViewController(post: currentPost)
         //vc.del = self
         navigationController?.pushViewController(vc, animated: true)

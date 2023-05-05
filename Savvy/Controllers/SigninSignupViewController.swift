@@ -6,7 +6,9 @@
 //
 
 import UIKit
+
 class SigninSignupViewController: UIViewController {
+    
     var logoImageView = UIImageView()
     var logoLabel = UILabel()
     var taglineLabel = UILabel()

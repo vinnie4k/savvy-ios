@@ -6,103 +6,94 @@
 //
 
 import UIKit
+
 class CustomCollectionViewCell: UICollectionViewCell {
+    
     //let imageView = UIImageView()
-    let typeLabel = UILabel()
-    let positionNameLabel = UILabel()
-    let employerLabel = UILabel()
-    let durationLabel = UILabel()
-    let wageTextView = UITextView()
-    let wageLabel = UILabel()
+    
+    let positionLabel = UILabel()
+    let organizationLabel = UILabel()
+    let createDateLabel = UILabel()
+    let paymentTextView = UITextView()
+    let paymentLabel = UILabel()
         
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = UIColor(red: 217/255, green: 217/255, blue: 217/255, alpha: 1.0)
+        self.layer.borderWidth = 1
+        self.layer.borderColor = UIColor(red: 217/255, green: 217/255, blue: 217/255, alpha: 1.0).cgColor
+        self.backgroundColor = .white
         self.layer.cornerRadius = 10
         self.clipsToBounds = true
             
-        typeLabel.textColor = .black
-        typeLabel.font = .systemFont(ofSize: 16)
-        typeLabel.numberOfLines = 1
-        typeLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(typeLabel)
-            
-        positionNameLabel.textColor = .black
-        positionNameLabel.font = .systemFont(ofSize: 32)
-        positionNameLabel.numberOfLines = 1
-        positionNameLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(positionNameLabel)
+        positionLabel.textColor = .black
+        positionLabel.font = .systemFont(ofSize: 24)
+        positionLabel.numberOfLines = 1
+        positionLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(positionLabel)
         
-        employerLabel.textColor = .black
-        employerLabel.font = .systemFont(ofSize: 20)
-        employerLabel.numberOfLines = 1
-        employerLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(employerLabel)
+        organizationLabel.textColor = .black
+        organizationLabel.font = .systemFont(ofSize: 16)
+        organizationLabel.numberOfLines = 1
+        organizationLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(organizationLabel)
         
-        durationLabel.textColor = .black
-        durationLabel.font = .systemFont(ofSize: 16)
-        durationLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(durationLabel)
+        createDateLabel.textColor = .black
+        createDateLabel.font = .systemFont(ofSize: 16)
+        createDateLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(createDateLabel)
         
-        wageTextView.backgroundColor = UIColor.white
-        wageTextView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(wageTextView)
+        paymentTextView.backgroundColor = UIColor(red: CGFloat(242.0/255.0), green: CGFloat(233.0/255.0), blue: CGFloat(247/255.0), alpha: 1.0)
+        paymentTextView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(paymentTextView)
         
-        wageLabel.textColor = .black
-        wageLabel.font = .systemFont(ofSize: 16)
-        wageLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(wageLabel)
+        paymentLabel.textColor = .black
+        paymentLabel.font = .systemFont(ofSize: 16)
+        paymentLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(paymentLabel)
         
         setUpConstraints()
     }
         
     func setUpConstraints() {
-        
             
         NSLayoutConstraint.activate([
-            typeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 24),
-            typeLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
-            typeLabel.heightAnchor.constraint(equalToConstant:19)
-        ])
-            
-        NSLayoutConstraint.activate([
-            positionNameLabel.topAnchor.constraint(equalTo: self.typeLabel.bottomAnchor, constant: 32),
-            positionNameLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
-            positionNameLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24)
+            positionLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 16),
+            positionLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            positionLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24)
         ])
         
         NSLayoutConstraint.activate([
-            employerLabel.topAnchor.constraint(equalTo: self.positionNameLabel.bottomAnchor, constant: 5),
-            employerLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
-            employerLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24)
+            organizationLabel.topAnchor.constraint(equalTo: self.positionLabel.bottomAnchor, constant: 5),
+            organizationLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            organizationLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16)
         ])
         
         NSLayoutConstraint.activate([
-            durationLabel.topAnchor.constraint(equalTo: self.employerLabel.bottomAnchor, constant: 8),
-            durationLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
-            durationLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24)
+            createDateLabel.topAnchor.constraint(equalTo: self.organizationLabel.bottomAnchor, constant: 8),
+            createDateLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            createDateLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16)
         ])
         
         NSLayoutConstraint.activate([
-            wageTextView.topAnchor.constraint(equalTo: self.durationLabel.bottomAnchor, constant: 8),
-            wageTextView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
-            wageTextView.widthAnchor.constraint(equalToConstant: 69),
-            wageTextView.heightAnchor.constraint(equalToConstant: 24)
+            paymentTextView.topAnchor.constraint(equalTo: self.createDateLabel.bottomAnchor, constant: 8),
+            paymentTextView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            paymentTextView.widthAnchor.constraint(equalToConstant: 69),
+            paymentTextView.heightAnchor.constraint(equalToConstant: 24)
         ])
         
         NSLayoutConstraint.activate([
-            wageLabel.centerXAnchor.constraint(equalTo: self.wageTextView.centerXAnchor),
-            wageLabel.centerYAnchor.constraint(equalTo: self.wageTextView.centerYAnchor)
+            paymentLabel.centerXAnchor.constraint(equalTo: self.paymentTextView.centerXAnchor),
+            paymentLabel.centerYAnchor.constraint(equalTo: self.paymentTextView.centerYAnchor)
         ])
         
     }
         
     func update(post: Post) {
-        typeLabel.text = post.type
-        positionNameLabel.text = post.positionName
-        employerLabel.text = post.employer
-        durationLabel.text = post.duration
-        wageLabel.text = "$" + post.wage
+        //imageView.image = UIImage(named: restaurant.imageName)
+        positionLabel.text = post.position
+        organizationLabel.text = post.organization
+        createDateLabel.text = "Posted " + post.createDate
+        paymentLabel.text = post.payment
     }
         
     required init?(coder: NSCoder) {

@@ -6,12 +6,14 @@
 //
 
 import UIKit
+
 class CustomFilterCollectionViewCell: UICollectionViewCell {
+    
     let label = UILabel()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.layer.cornerRadius = 10
+        self.layer.cornerRadius = 5
         self.clipsToBounds = true
         
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -36,20 +38,11 @@ class CustomFilterCollectionViewCell: UICollectionViewCell {
         
     }
     
-    func configure(filterName: Filter) {
-        label.text = filterName.filterLabel
+    func configure(tag: Tag) {
+        label.text = tag.label
         
-        if (filterName.isSelected) {
-            label.textColor = .white
-            label.backgroundColor = UIColor.black
-        } else {
-            label.textColor = UIColor.black
-            label.backgroundColor = UIColor(red: CGFloat(217.0/255.0), green: CGFloat(217.0/255.0), blue: CGFloat(217.0/255.0), alpha: CGFloat(1.0))
-            
-        }
+       
     }
-    
-    
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

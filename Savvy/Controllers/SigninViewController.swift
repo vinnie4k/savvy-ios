@@ -6,7 +6,9 @@
 //
 
 import UIKit
+
 class SigninViewController: UIViewController {
+    
     let logoImageView = UIImageView()
     let signinLabel = UILabel()
     let usernameLabel = UILabel()
@@ -145,9 +147,18 @@ class SigninViewController: UIViewController {
                 if user.password == password {
                     print("User authenticated!")
                     UserDefaults.standard.set(true, forKey: "is_authenticated")
+                    UserDefaults.standard.set(user.id, forKey: "id")
                     UserDefaults.standard.set(netid, forKey: "netid")
                     UserDefaults.standard.set(user.name, forKey: "userName")
-                    UserDefaults.standard.set(user.interests, forKey: "interests")
+                    UserDefaults.standard.set(user.password, forKey: "password")
+                    UserDefaults.standard.set(user.classYear, forKey: "classYear")
+                    do {
+                        let encodedData = try JSONEncoder().encode(user.savedPosts)
+                        UserDefaults.standard.set(encodedData, forKey: "savedPosts")
+                    } catch {
+                        // Failed to encode Contact to Data
+                    }
+                    
                     UserDefaults.standard.synchronize()
                     let sceneDelegate = self.view.window?.windowScene?.delegate as! SceneDelegate
                     sceneDelegate.moveToViewController()
@@ -175,12 +186,4 @@ class SigninViewController: UIViewController {
             }
             return nil
     }
-    /*
-    // MARK: - Navigation
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 }
