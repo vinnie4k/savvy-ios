@@ -57,7 +57,7 @@ struct DummyData {
         ),
     ]
     
-    static var mainUser = User(id: 1, appliedPosts: [], imgUrl: URL(string: "https://scontent.cdninstagram.com/v/t51.2885-19/222047372_264345962120146_7429469079747555586_n.jpg?stp=dst-jpg_s150x150&_nc_ht=scontent.cdninstagram.com&_nc_cat=110&_nc_ohc=s6YV1qWgQ-wAX93Avr3&edm=APs17CUBAAAA&ccb=7-5&oh=00_AfCcoNSA1ICR0dgQFNNTZol2UIxPks__pJRIbC0TeEHYTw&oe=645B17BF&_nc_sid=978cb9")!, name: "Caitlyn Jin", netid: "cj384", savedPosts: [])
+    static var mainUser = User(id: 1, appliedPosts: [], imgUrl: URL(string: "https://scontent.cdninstagram.com/v/t51.2885-19/222047372_264345962120146_7429469079747555586_n.jpg?stp=dst-jpg_s150x150&_nc_ht=scontent.cdninstagram.com&_nc_cat=110&_nc_ohc=s6YV1qWgQ-wAX93Avr3&edm=APs17CUBAAAA&ccb=7-5&oh=00_AfCcoNSA1ICR0dgQFNNTZol2UIxPks__pJRIbC0TeEHYTw&oe=645B17BF&_nc_sid=978cb9")!, name: "", netid: "", savedPosts: [])
     
     static let tags = [
         Tag(id: 1, name: "Paid", type: .payment),
