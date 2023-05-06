@@ -40,11 +40,21 @@ class AuthenticationViewModel: ObservableObject {
                 accessToken: user.accessToken.tokenString
             )
             
-            Auth.auth().signIn(with: credential) { [unowned self] _, error in
+            Auth.auth().signIn(with: credential) { [unowned self] user, error in
                 if let error = error {
                     print(error.localizedDescription)
                 } else {
                     self.state = .signedIn
+                    
+                    guard let googleUser = Auth.auth().currentUser else { return }
+                    
+                    let netid = googleUser.email?.components(separatedBy: "@").first ?? ""
+                    let imgUrl = googleUser.photoURL?.absoluteString ?? ""
+                    let name = googleUser.displayName ?? ""
+                    
+                    UserDefaults.standard.set(netid, forKey: "netid")
+                    UserDefaults.standard.set(name, forKey: "name")
+                    UserDefaults.standard.set(imgUrl, forKey: "imageUrl")
                 }
             }
         }
@@ -52,6 +62,9 @@ class AuthenticationViewModel: ObservableObject {
     
     func signOut() {
         state = .signedOut
+        UserDefaults.standard.set("", forKey: "netid")
+        UserDefaults.standard.set("", forKey: "name")
+        UserDefaults.standard.set("", forKey: "imageUrl")
         do {
             try Auth.auth().signOut()
         } catch {
@@ -67,7 +80,6 @@ class AuthenticationViewModel: ObservableObject {
         request.httpMethod = "POST"
         
         let parameters = ["name": name, "netid": netid, "img_url": imageUrl]
-        print(name)
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
         } catch let error {

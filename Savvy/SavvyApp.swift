@@ -41,8 +41,11 @@ struct SavvyApp: App {
             .environmentObject(user)
             .environmentObject(authViewModel)
             .onAppear {
-                authViewModel.signIn()
-                authenticateUser()
+                if let netid = UserDefaults.standard.value(forKey: "netid") as? String,
+                   let imgUrl = UserDefaults.standard.value(forKey: "imageUrl") as? String,
+                   let name = UserDefaults.standard.value(forKey: "name") as? String {
+                    authenticateUserDefault(name: name, netid: netid, imgUrl: imgUrl)
+                }
             }
             .onChange(of: authViewModel.state) { _ in
                 authenticateUser()
@@ -69,6 +72,21 @@ struct SavvyApp: App {
                 user.netid = newUser.netid
                 user.appliedPosts = newUser.appliedPosts
                 user.savedPosts = newUser.savedPosts
+            }
+        }
+    }
+    
+    private func authenticateUserDefault(name: String, netid: String, imgUrl: String) {
+        authViewModel.createUser(name: name, netid: netid, imageUrl: imgUrl) { newUser in
+            DispatchQueue.main.async {
+                user.id = newUser.id
+                user.imgUrl = newUser.imgUrl
+                user.name = newUser.name
+                user.netid = newUser.netid
+                user.appliedPosts = newUser.appliedPosts
+                user.savedPosts = newUser.savedPosts
+                
+                authViewModel.state = .signedIn
             }
         }
     }
