@@ -11,7 +11,8 @@ struct PostingCellView: View {
     
     // MARK: - Properties
     
-    @ObservedObject var user: User
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
+    @EnvironmentObject var user: User
     var post: Post
     
     // MARK: - Constants
@@ -59,8 +60,12 @@ struct PostingCellView: View {
                     .resizable()
                     .frame(width: Constants.bookmarkSize.width, height: Constants.bookmarkSize.height)
                     .onTapGesture {
-                        withAnimation(.default) {
-                            user.savedPosts.removeAll { $0.id == post.id }
+                        authViewModel.bookmarkPost(toSave: false, postID: post.id, userID: user.id) { posts in
+                            DispatchQueue.main.async {
+                                withAnimation(.default) {
+                                    user.savedPosts = posts
+                                }
+                            }
                         }
                     }
             } else {
@@ -69,7 +74,13 @@ struct PostingCellView: View {
                     .frame(width: Constants.bookmarkSize.width, height: Constants.bookmarkSize.height)
                     .onTapGesture {
                         withAnimation(.default) {
-                            user.savedPosts.append(post)
+                            authViewModel.bookmarkPost(toSave: true, postID: post.id, userID: user.id) { posts in
+                                DispatchQueue.main.async {
+                                    withAnimation(.default) {
+                                        user.savedPosts = posts
+                                    }
+                                }
+                            }
                         }
                     }
             }

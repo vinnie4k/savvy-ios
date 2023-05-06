@@ -26,6 +26,7 @@
 		2E17849F2A05E66E00EB1252 /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E17849E2A05E66E00EB1252 /* AuthenticationViewModel.swift */; };
 		2E1784A12A05EBE100EB1252 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1784A02A05EBE100EB1252 /* LoginView.swift */; };
 		2E1784A32A05FDC700EB1252 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1784A22A05FDC700EB1252 /* ProfileView.swift */; };
+		2E1784A52A06108300EB1252 /* UserDefaults+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1784A42A06108300EB1252 /* UserDefaults+Extension.swift */; };
 		2ECB3E372A055203000E7D5A /* SavvyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ECB3E362A055203000E7D5A /* SavvyApp.swift */; };
 		2ECB3E3B2A055204000E7D5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2ECB3E3A2A055204000E7D5A /* Assets.xcassets */; };
 		2ECB3E3E2A055204000E7D5A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2ECB3E3D2A055204000E7D5A /* Preview Assets.xcassets */; };
@@ -49,6 +50,7 @@
 		2E17849E2A05E66E00EB1252 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
 		2E1784A02A05EBE100EB1252 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		2E1784A22A05FDC700EB1252 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		2E1784A42A06108300EB1252 /* UserDefaults+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Extension.swift"; sourceTree = "<group>"; };
 		2ECB3E332A055203000E7D5A /* Savvy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Savvy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2ECB3E362A055203000E7D5A /* SavvyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavvyApp.swift; sourceTree = "<group>"; };
 		2ECB3E3A2A055204000E7D5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 				2E17848A2A0588B600EB1252 /* Color+Extension.swift */,
 				2E1784842A057A8C00EB1252 /* Font+Extension.swift */,
 				2E17848C2A05A36400EB1252 /* Image+Extension.swift */,
+				2E1784A42A06108300EB1252 /* UserDefaults+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -244,6 +247,7 @@
 				2ECB3E372A055203000E7D5A /* SavvyApp.swift in Sources */,
 				2E17849F2A05E66E00EB1252 /* AuthenticationViewModel.swift in Sources */,
 				2E1784A12A05EBE100EB1252 /* LoginView.swift in Sources */,
+				2E1784A52A06108300EB1252 /* UserDefaults+Extension.swift in Sources */,
 				2E17848B2A0588B600EB1252 /* Color+Extension.swift in Sources */,
 				2E1784822A055C4000EB1252 /* HomeViewModel.swift in Sources */,
 				2E17848F2A05A74D00EB1252 /* SearchBarView.swift in Sources */,

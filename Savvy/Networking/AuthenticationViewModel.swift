@@ -11,6 +11,8 @@ import SwiftUI
 
 class AuthenticationViewModel: ObservableObject {
     
+    static let shared = AuthenticationViewModel()
+    
     @Published var state: SignInState = .signedOut
 
     func signIn() {
@@ -48,11 +50,110 @@ class AuthenticationViewModel: ObservableObject {
         }
     }
     
+    func signOut() {
+        state = .signedOut
+        do {
+            try Auth.auth().signOut()
+        } catch {
+            print("Unable to sign out")
+        }
+    }
+    
+    func createUser(name: String, netid: String, imageUrl: String, completion: @escaping (User) -> Void) {
+        guard let url = URL(string: "http://34.150.213.122/api/users/") else { return }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        
+        let parameters = ["name": name, "netid": netid, "img_url": imageUrl]
+        print(name)
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: .prettyPrinted)
+        } catch let error {
+            print(error.localizedDescription)
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, let response = response as? HTTPURLResponse, error == nil else {
+                print(URLError(.badServerResponse))
+                return
+            }
+            
+            guard (200 ... 299) ~= response.statusCode else {
+                print("statusCode should be 2xx, but is \(response.statusCode)")
+                print("response = \(response)")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+                        
+            do {
+                let user = try decoder.decode(User.self, from: data)
+                completion(user)
+            } catch {
+                print(error)
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("responseString = \(responseString)")
+                } else {
+                    print("unable to parse response as string")
+                }
+            }
+        }
+        
+        task.resume()
+    }
+    
+    func bookmarkPost(toSave: Bool, postID: Int, userID: Int, completion: @escaping ([Post]) -> Void) {
+        var saveString = "save_post"
+        if !toSave {
+            saveString = "unsave_post"
+        }
+        guard let url = URL(string: "http://34.150.213.122/api/users/\(userID)/\(saveString)/\(postID)/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, let response = response as? HTTPURLResponse, error == nil else {
+                print(URLError(.badServerResponse))
+                return
+            }
+            
+            guard (200 ... 299) ~= response.statusCode else {
+                print("statusCode should be 2xx, but is \(response.statusCode)")
+                print("response = \(response)")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+                        
+            do {
+                let postList = try decoder.decode(PostList.self, from: data)
+                completion(postList.posts)
+            } catch {
+                print(error)
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("responseString = \(responseString)")
+                } else {
+                    print("unable to parse response as string")
+                }
+            }
+        }
+        
+        task.resume()
+    }
+    
 }
 
 extension AuthenticationViewModel {
     
-    enum SignInState {
+    enum SignInState: Equatable {
         case signedIn
         case signedOut
     }

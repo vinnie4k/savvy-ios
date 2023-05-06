@@ -12,7 +12,8 @@ struct PostDetailView: View {
     // MARK: - Properties
     @Environment(\.presentationMode) var presentation
 
-    @ObservedObject var user: User
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
+    @EnvironmentObject var user: User
     var post: Post
     
     // MARK: - UI
@@ -63,6 +64,13 @@ struct PostDetailView: View {
                         .onTapGesture {
                             withAnimation(.default) {
                                 user.savedPosts.removeAll { $0.id == post.id }
+                                authViewModel.bookmarkPost(toSave: false, postID: post.id, userID: user.id) { posts in
+                                    DispatchQueue.main.async {
+                                        withAnimation(.default) {
+                                            user.savedPosts = posts
+                                        }
+                                    }
+                                }
                             }
                         }
                 } else {
@@ -71,7 +79,13 @@ struct PostDetailView: View {
                         .frame(width: 18, height: 24)
                         .onTapGesture {
                             withAnimation(.default) {
-                                user.savedPosts.append(post)
+                                authViewModel.bookmarkPost(toSave: true, postID: post.id, userID: user.id) { posts in
+                                    DispatchQueue.main.async {
+                                        withAnimation(.default) {
+                                            user.savedPosts = posts
+                                        }
+                                    }
+                                }
                             }
                         }
                 }

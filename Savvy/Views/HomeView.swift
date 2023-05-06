@@ -60,7 +60,7 @@ struct HomeView: View {
         HStack(spacing: 16) {
             AsyncImage(url: user.imgUrl) { image in
                 NavigationLink {
-                    ProfileView(user: user)
+                    ProfileView()
                 } label: {
                     image
                         .resizable()
@@ -94,9 +94,9 @@ struct HomeView: View {
             HStack(spacing: 8) {
                 ForEach(viewModel.postings, id: \.id) { post in
                     NavigationLink {
-                        PostDetailView(user: user, post: post)
+                        PostDetailView(post: post)
                     } label: {
-                        PostingCellView(user: user, post: post)
+                        PostingCellView(post: post)
                             .frame(width: Constants.forYouCellSize.width, height: Constants.forYouCellSize.height)
                             .cornerRadius(Constants.cellRadius)
                     }
@@ -157,9 +157,9 @@ struct HomeView: View {
         VStack(spacing: 16) {
             ForEach(viewModel.postings, id: \.id) { post in
                 NavigationLink {
-                    PostDetailView(user: user, post: post)
+                    PostDetailView(post: post)
                 } label: {
-                    PostingCellView(user: user, post: post)
+                    PostingCellView(post: post)
                         .cornerRadius(Constants.cellRadius)
                 }
                 .buttonStyle(.plain)

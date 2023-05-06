@@ -11,12 +11,6 @@ import GoogleSignIn
 import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        FirebaseApp.configure()
-        return true
-    }
-    
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         return GIDSignIn.sharedInstance.handle(url)
     }
@@ -25,18 +19,56 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct SavvyApp: App {
     
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    @StateObject var user: User = DummyData.mainUser
-    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+    
+    @StateObject var authViewModel = AuthenticationViewModel.shared
+    @StateObject var user: User = User.shared
+    
+    init() {
+        configureFirebase()
+    }
     
     var body: some Scene {
         WindowGroup {
-            if isLoggedIn {
-                HomeView()
-                    .environmentObject(user)
-            } else {
-                LoginView()
-                    .environmentObject(user)
+            Group {
+                switch authViewModel.state {
+                case .signedIn:
+                    HomeView()
+                case .signedOut:
+                    LoginView()
+                }
+            }
+            .environmentObject(user)
+            .environmentObject(authViewModel)
+            .onAppear {
+                authViewModel.signIn()
+                authenticateUser()
+            }
+            .onChange(of: authViewModel.state) { _ in
+                authenticateUser()
+            }
+        }
+    }
+    
+    private func configureFirebase() {
+        FirebaseApp.configure()
+    }
+    
+    private func authenticateUser() {
+        guard let googleUser = Auth.auth().currentUser else { return }
+        
+        let netid = googleUser.email?.components(separatedBy: "@").first ?? ""
+        let imgUrl = googleUser.photoURL?.absoluteString ?? ""
+        let name = googleUser.displayName ?? ""
+        
+        authViewModel.createUser(name: name, netid: netid, imageUrl: imgUrl) { newUser in
+            DispatchQueue.main.async {
+                user.id = newUser.id
+                user.imgUrl = newUser.imgUrl
+                user.name = newUser.name
+                user.netid = newUser.netid
+                user.appliedPosts = newUser.appliedPosts
+                user.savedPosts = newUser.savedPosts
             }
         }
     }
