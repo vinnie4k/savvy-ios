@@ -10,9 +10,10 @@ import SwiftUI
 struct ProfileView: View {
     
     // MARK: - Properties
+    
     @Environment(\.presentationMode) var presentation
-
-    @ObservedObject var user: User
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
+    @EnvironmentObject var user: User
     
     // MARK: - UI
     
@@ -34,6 +35,15 @@ struct ProfileView: View {
                     .frame(width: 20, height: 20)
                     .onTapGesture {
                         presentation.wrappedValue.dismiss()
+                    }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Text("Sign Out")
+                    .font(.newYorkMedium(size: 16))
+                    .foregroundColor(Color.savvy.baseText)
+                    .onTapGesture {
+                        authViewModel.signOut()
                     }
             }
         }
@@ -74,9 +84,9 @@ struct ProfileView: View {
                 HStack(spacing: 8) {
                     ForEach(user.savedPosts, id: \.id) { post in
                         NavigationLink {
-                            PostDetailView(user: user, post: post)
+                            PostDetailView(post: post)
                         } label: {
-                            PostingCellView(user: user, post: post)
+                            PostingCellView(post: post)
                                 .frame(width: 323, height: 156)
                                 .cornerRadius(8)
                         }
@@ -94,9 +104,9 @@ struct ProfileView: View {
             
             ForEach(user.appliedPosts, id: \.id) { post in
                 NavigationLink {
-                    PostDetailView(user: user, post: post)
+                    PostDetailView(post: post)
                 } label: {
-                    PostingCellView(user: user, post: post)
+                    PostingCellView(post: post)
                         .cornerRadius(8)
                 }
                 .buttonStyle(.plain)

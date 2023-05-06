@@ -11,7 +11,7 @@ import SwiftUI
 struct LoginView: View {
     
     @EnvironmentObject var user: User
-    @StateObject private var authViewModel = AuthenticationViewModel()
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
     
     var body: some View {
         VStack {
@@ -23,24 +23,6 @@ struct LoginView: View {
                 .onTapGesture {
                     authViewModel.signIn()
                 }
-        }
-        .onChange(of: authViewModel.state) { state in
-            switch state {
-            case .signedIn:
-                guard let googleUser = Auth.auth().currentUser else { return }
-                
-                let netid = googleUser.email?.components(separatedBy: "@").first
-                
-                user.id = googleUser.uid
-                user.imgUrl = googleUser.photoURL!
-                user.name = googleUser.displayName ?? ""
-                user.netid = netid ?? ""
-                user.savedPosts = []
-                
-                UserDefaults.standard.set(true, forKey: "isLoggedIn")
-            case .signedOut:
-                break
-            }
         }
     }
     
