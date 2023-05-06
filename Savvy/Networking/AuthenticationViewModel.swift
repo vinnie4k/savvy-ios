@@ -161,6 +161,49 @@ class AuthenticationViewModel: ObservableObject {
         task.resume()
     }
     
+    func applyPost(toApply: Bool, postID: Int, userID: Int, completion: @escaping ([Post]) -> Void) {
+        var applyString = "apply_post"
+        if !toApply {
+            applyString = "unapply_post"
+        }
+        guard let url = URL(string: "http://34.150.213.122/api/users/\(userID)/\(applyString)/\(postID)/") else { return }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, let response = response as? HTTPURLResponse, error == nil else {
+                print(URLError(.badServerResponse))
+                return
+            }
+            
+            guard (200 ... 299) ~= response.statusCode else {
+                print("statusCode should be 2xx, but is \(response.statusCode)")
+                print("response = \(response)")
+                return
+            }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+                        
+            do {
+                let postList = try decoder.decode(PostList.self, from: data)
+                completion(postList.posts)
+            } catch {
+                print(error)
+                
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("responseString = \(responseString)")
+                } else {
+                    print("unable to parse response as string")
+                }
+            }
+        }
+        
+        task.resume()
+    }
+    
 }
 
 extension AuthenticationViewModel {

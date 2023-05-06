@@ -39,7 +39,11 @@ struct PostDetailView: View {
                         }
                         .buttonStyle(.plain)
                         .simultaneousGesture(TapGesture().onEnded{
-                            user.appliedPosts.append(post)
+                            authViewModel.applyPost(toApply: true, postID: post.id, userID: user.id) { posts in
+                                DispatchQueue.main.async {
+                                    user.appliedPosts = posts
+                                }
+                            }
                         })
                     }
                 }
@@ -115,7 +119,11 @@ struct PostDetailView: View {
                 }
                 .buttonStyle(.plain)
                 .simultaneousGesture(TapGesture().onEnded{
-                    user.appliedPosts.append(post)
+                    authViewModel.applyPost(toApply: true, postID: post.id, userID: user.id) { posts in
+                        DispatchQueue.main.async {
+                            user.appliedPosts = posts
+                        }
+                    }
                 })
             }
         }
